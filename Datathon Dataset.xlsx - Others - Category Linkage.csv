@@ -1,0 +1,26 @@
+Category Names,ID,Category,Cat Order
+AP,1,Outflow,1
+Netting AP,2,Outflow,1
+Netting AP - NTI cross charge,3,Outflow,1
+Netting AP - Stock,4,Outflow,1
+Netting AP - Others,5,Outflow,1
+Non-Netting AP,6,Outflow,1
+Tax payable,7,Outflow,1
+Custom and Duty,8,Outflow,1
+Payroll,9,Outflow,1
+Statutory contribution,10,Outflow,1
+Bank charges,11,Outflow,1
+Loan payment,12,Outflow,1
+Interest charges,13,Outflow,1
+Loan payment and interest charges,14,Outflow,1
+Dividend Payout,15,Outflow,1
+Netting AR,16,Inflow,2
+Netting AR - Others,17,Inflow,2
+Non-Netting AR,18,Inflow,2
+Loan receipt,19,Inflow,2
+Loan receipt and interest charges,20,Inflow,2
+Loan receipt and interest,21,Inflow,2
+Other receipt,22,Inflow,2
+Interest income,23,Inflow,2
+Loan repayment,24,Inflow,2
+AR,25,Inflow,2
