@@ -26,3 +26,6 @@ for col in cat_cols:
 
 # Save result
 df.to_csv('Preprocessed_Main_Data.csv', index=False)
+
+# Forecast - Arima Model
+preprocessed_data = pd.read_csv('Preprocessed_Main_Data.csv')
