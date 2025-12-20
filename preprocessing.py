@@ -60,14 +60,14 @@ model_fit = model.fit(disp=False)
 # Weekly Net Cash Flow Forecast for One Month - Short Term
 
 forecast_steps = 4
-forecast_result = model_fit.get_prediction(start="2025-10-05", end="2025-11-02", dynamic = True)
+forecast_result = model_fit.get_prediction(start="2025-10-05", end="2025-11-30", dynamic = True)
 forecast_mean = forecast_result.predicted_mean
 conf_int = forecast_result.conf_int()
 
-# 9. Evaluation
-mse = mean_squared_error(ts_data[-5:], forecast_mean)
+# Evaluation
+mse = mean_squared_error(ts_data[-5:], forecast_mean[:5])
 rmse = np.sqrt(mse)
-mape = mean_absolute_percentage_error(ts_data[-5:], forecast_mean)
+mape = mean_absolute_percentage_error(ts_data[-5:], forecast_mean[:5])
 print(f"\n--- Model Evaluation ---")
 print(f"Mean Squared Error: {mse:,.2f}")
 print(f"Root Mean Squared Error: {rmse:,.2f}")
@@ -77,23 +77,24 @@ plt.figure(figsize=(12, 6))
 plt.plot(ts_data.index, ts_data, label = 'Actual', color = 'blue')
 plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color='red', linestyle='--')
 plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-plt.title('Weekly Net Cash Flow Forecast (SARIMA) - One Month')
+plt.title('Weekly Net Cash Flow Forecast (1 Month)')
 plt.xlabel('Date')
 plt.ylabel('Net Cash Flow (USD)')
 plt.legend()
 plt.grid(True)
+plt.savefig("Weekly Net Cash Flow Forecast (1 Month)")
 plt.show()
 
 # Weekly Net Cash Flow Forecast for Six Month - Long Term
 forecast_steps = 26
-forecast_result = model_fit.get_prediction(start="2025-05-18", end="2025-11-02", dynamic = True)
+forecast_result = model_fit.get_prediction(start="2025-05-18", end="2026-04-19", dynamic = True)
 forecast_mean = forecast_result.predicted_mean
 conf_int = forecast_result.conf_int()
 
-# 9. Evaluation
-mse = mean_squared_error(ts_data[19:], forecast_mean)
+# Evaluation
+mse = mean_squared_error(ts_data[19:], forecast_mean[:25])
 rmse = np.sqrt(mse)
-mape = mean_absolute_percentage_error(ts_data[19:], forecast_mean)
+mape = mean_absolute_percentage_error(ts_data[19:], forecast_mean[:25])
 print(f"\n--- Model Evaluation ---")
 print(f"Mean Squared Error: {mse:,.2f}")
 print(f"Root Mean Squared Error: {rmse:,.2f}")
@@ -103,11 +104,12 @@ plt.figure(figsize=(12, 6))
 plt.plot(ts_data.index, ts_data, label = 'Actual', color = 'blue')
 plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color='red', linestyle='--')
 plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-plt.title('Weekly Net Cash Flow Forecast (SARIMA) - One Month')
+plt.title('Weekly Net Cash Flow Forecast (6 Month)')
 plt.xlabel('Date')
 plt.ylabel('Net Cash Flow (USD)')
 plt.legend()
 plt.grid(True)
+plt.savefig("Weekly Net Cash Flow Forecast (6 Month) ")
 plt.show()
 
 
@@ -127,14 +129,14 @@ model_fit = model.fit(disp=False)
 # Weekly Ending Cash Balance for One Month - Short Term
 
 forecast_steps = 4
-forecast_result = model_fit.get_prediction(start="2025-10-05", end="2025-11-02", dynamic = True)
+forecast_result = model_fit.get_prediction(start="2025-10-05", end="2025-11-30", dynamic = True)
 forecast_mean = forecast_result.predicted_mean
 conf_int = forecast_result.conf_int()
 
-# 9. Evaluation
-mse = mean_squared_error(historical_ending_balance[-5:], forecast_mean)
+# Evaluation
+mse = mean_squared_error(historical_ending_balance[-5:], forecast_mean[:5])
 rmse = np.sqrt(mse)
-mape = mean_absolute_percentage_error(historical_ending_balance[-5:], forecast_mean)
+mape = mean_absolute_percentage_error(historical_ending_balance[-5:], forecast_mean[:5])
 print(f"\n--- Model Evaluation ---")
 print(f"Mean Squared Error: {mse:,.2f}")
 print(f"Root Mean Squared Error: {rmse:,.2f}")
@@ -151,18 +153,20 @@ plt.xlabel('Date')
 plt.ylabel('Ending Balance (USD)')
 plt.legend()
 plt.grid(True, alpha=0.3)
+plt.savefig("Weekly Ending Cash Balance Forecast (1 Month)")
 plt.show()
+
 
 # Weekly Ending Cash Balance for Six Month - Long Term
 
-forecast_result = model_fit.get_prediction(start="2025-05-18", end="2025-11-02", dynamic = True)
+forecast_result = model_fit.get_prediction(start="2025-05-18", end="2026-04-19", dynamic = True)
 forecast_mean = forecast_result.predicted_mean
 conf_int = forecast_result.conf_int()
 
-# 9. Evaluation
-mse = mean_squared_error(historical_ending_balance[19:], forecast_mean)
+# Evaluation
+mse = mean_squared_error(historical_ending_balance[19:], forecast_mean[:25])
 rmse = np.sqrt(mse)
-mape = mean_absolute_percentage_error(historical_ending_balance[19:], forecast_mean)
+mape = mean_absolute_percentage_error(historical_ending_balance[19:], forecast_mean[:25])
 print(f"\n--- Model Evaluation ---")
 print(f"Mean Squared Error: {mse:,.2f}")
 print(f"Root Mean Squared Error: {rmse:,.2f}")
@@ -174,56 +178,73 @@ plt.plot(historical_ending_balance.index, historical_ending_balance,
              label='Actual Ending Balance', color='blue', linewidth=2)
 plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color='red', linestyle='--')
 plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-plt.title('Weekly Ending Cash Balance Forecast (1 Month)')
+plt.title('Weekly Ending Cash Balance Forecast (6 Month)')
 plt.xlabel('Date')
 plt.ylabel('Ending Balance (USD)')
 plt.legend()
 plt.grid(True, alpha=0.3)
+plt.savefig("Weekly Ending Cash Balance Forecast (6 Month)")
 plt.show()
+
 
 # Categories Forecasting
 
-# Select the top 4 categories to analyze
-top_categories = df.groupby('Category')['Net Cash Flow (USD)'].sum().abs().nlargest(4).index.tolist()
+# Select the top 2 categories to analyze
+top_categories = df.groupby('Category')['Net Cash Flow (USD)'].sum().abs().nlargest(2).index.tolist()
 
 plt.figure(figsize=(16, 10))
 
-for i, cat in enumerate(top_categories, 1):
-    # Filter and Resample data for the specific category
-    cat_ts = df[df['Category'] == cat].set_index('Pstng Date')['Net Cash Flow (USD)'].resample('W').sum()
-    
-    # Fill gaps with 0 if no transactions occurred in a week
-    cat_ts = cat_ts.fillna(0)
-    
-    # Create and fit the model for this specific category
-    try:
-        model = SARIMAX(cat_ts, 
-                        order=(1, 1, 1), 
-                        seasonal_order=(1, 1, 1, 4),
-                        enforce_stationarity=False, 
-                        enforce_invertibility=False)
-        model_fit = model.fit(disp=False)
-        
-        # Forecast for the last 5 weeks + 4 weeks into the future
-        # Adjusting start date to match your dataset end (2025-11-02)
-        forecast_res = model_fit.get_prediction(start="2025-10-05", end="2025-11-30")
-        forecast_mean = forecast_res.predicted_mean
-        conf_int = forecast_res.conf_int()
-        
-        # Plotting in subplots
-        plt.subplot(2, 2, i)
-        plt.plot(cat_ts.index, cat_ts, label='Actual', color='blue', alpha=0.6)
-        plt.plot(forecast_mean.index, forecast_mean, label='Forecast', color='red', linestyle='--')
-        plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-        plt.title(f'Weekly Forecast: {cat}')
-        plt.legend()
-        plt.grid(True, alpha=0.3)
-        
-    except Exception as e:
-        print(f"Could not model category {cat}: {e}")
+results = []
 
-plt.tight_layout()
-plt.show()
+# Define forecast window
+eval_start = "2025-10-05"
+future_end = "2025-11-30"
+
+for cat in top_categories:
+    # Prepare weekly time series
+    cat_ts_net = df[df['Category'] == cat].set_index('Pstng Date')['Amount in USD'].resample('W').sum().fillna(0)
+    cat_ts_bal = cat_ts_net.cumsum()
+    
+    # Create a safe filename prefix (replace spaces with underscores)
+    prefix = cat.replace(' ', '_')
+    
+    # --- A. Net Cash Flow Plot & Export ---
+    model_net = SARIMAX(cat_ts_net, order=(1, 1, 1), seasonal_order=(1, 1, 1, 4), enforce_stationarity=False).fit(disp=False)
+    pred_net_res = model_net.get_prediction(start=eval_start, end=future_end)
+    pred_net = pred_net_res.predicted_mean
+    conf_net = pred_net_res.conf_int()
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(cat_ts_net.index, cat_ts_net, label='Actual Net Flow', color='blue', marker='o', markersize=4)
+    plt.plot(pred_net.index, pred_net, label='SARIMA Forecast', color='red', linestyle='--')
+    plt.fill_between(pred_net.index, conf_net.iloc[:, 0], conf_net.iloc[:, 1], color='pink', alpha=0.3)
+    plt.title(f'{cat}: Weekly Net Cash Flow Forecast')
+    plt.xlabel('Date')
+    plt.ylabel('USD')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.savefig(f'{prefix}_Net_Flow_Forecast.png') # Saves the file
+    plt.show()
+    plt.close() # Closes current plot to save memory
+    
+    # --- B. Balance Contribution Plot & Export ---
+    model_bal = SARIMAX(cat_ts_bal, order=(1, 1, 1), seasonal_order=(1, 1, 1, 4), enforce_stationarity=False).fit(disp=False)
+    pred_bal_res = model_bal.get_prediction(start=eval_start, end=future_end)
+    pred_bal = pred_bal_res.predicted_mean
+    conf_bal = pred_bal_res.conf_int()
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(cat_ts_bal.index, cat_ts_bal, label='Actual Balance Contribution', color='green', marker='o', markersize=4)
+    plt.plot(pred_bal.index, pred_bal, label='SARIMA Forecast', color='orange', linestyle='--')
+    plt.fill_between(pred_bal.index, conf_bal.iloc[:, 0], conf_bal.iloc[:, 1], color='yellow', alpha=0.2)
+    plt.title(f'{cat}: Weekly Balance Contribution Forecast')
+    plt.xlabel('Date')
+    plt.ylabel('USD')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.savefig(f'{prefix}_Balance_Contribution_Forecast.png') # Saves the file
+    plt.show()
+    plt.close()
 
 # Create a dataframe to hold multiple category forecasts
 all_forecasts = pd.DataFrame()
