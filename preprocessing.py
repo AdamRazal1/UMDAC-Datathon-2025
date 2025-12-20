@@ -263,3 +263,47 @@ plt.ylabel("USD")
 plt.xlabel("Week Start Date")
 plt.xticks(rotation=45)
 plt.show()
+
+# --- POWER BI EXPORT PREPARATION ---
+
+# 1. Prepare Historical Data
+historical_combined = pd.DataFrame({
+    'Date': ts_data.index,
+    'Net_Cash_Flow': ts_data.values,
+    'Ending_Balance': historical_ending_balance.values,
+    'Type': 'Actual'
+})
+
+# 2. Prepare Forecast Data (using the 6-month forecast results)
+# Note: We take the mean predictions from your existing model_fit
+forecast_dates = pd.date_range(start=ts_data.index[-1] + pd.Timedelta(weeks=1), periods=26, freq='W')
+future_res = model_fit.get_forecast(steps=26)
+future_mean = future_res.predicted_mean
+future_conf = future_res.conf_int()
+
+forecast_combined = pd.DataFrame({
+    'Date': future_mean.index,
+    'Net_Cash_Flow': future_mean.values,
+    'Ending_Balance': np.nan, # Balance needs to be calculated cumulatively
+    'Type': 'Forecast',
+    'Lower_Bound': future_conf.iloc[:, 0].values,
+    'Upper_Bound': future_conf.iloc[:, 1].values
+})
+
+# Calculate forecasted Ending Balance based on last known actual
+last_bal = historical_ending_balance.iloc[-1]
+forecast_combined['Ending_Balance'] = last_bal + forecast_combined['Net_Cash_Flow'].cumsum()
+
+# 3. Combine Actuals and Forecasts
+final_export_df = pd.concat([historical_combined, forecast_combined], ignore_index=True)
+
+# 4. (Optional) Add Category-level Forecasts for Power BI Drilldown
+# We pivot your all_forecasts variable into a long format
+category_export = all_forecasts.reset_index().melt(id_vars='index', var_name='Category', value_name='Forecasted_Flow')
+category_export.rename(columns={'index': 'Date'}, inplace=True)
+
+# 5. Export to CSV
+final_export_df.to_csv('PowerBI_CashFlow_Main.csv', index=False)
+category_export.to_csv('PowerBI_Category_Forecasts.csv', index=False)
+
+print("Files 'PowerBI_CashFlow_Main.csv' and 'PowerBI_Category_Forecasts.csv' are ready for Power BI!")
