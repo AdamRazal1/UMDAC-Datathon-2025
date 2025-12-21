@@ -6,9 +6,8 @@ from sklearn.ensemble import IsolationForest, RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 import matplotlib.patches as mpatches
 
-# ==========================================
-# 0. HELPER: SMART LABELING FUNCTIONS
-# ==========================================
+
+# Labelling Functions
 def add_bar_labels(ax, format_str='{:.0f}', offset=5):
     """Adds text labels to the end of bars in a horizontal bar chart."""
     for p in ax.patches:
@@ -30,9 +29,8 @@ def add_vertical_bar_labels(ax, format_str='{:.0f}'):
                         xytext=(0, 5), 
                         textcoords='offset points',
                         ha='center', va='bottom', fontweight='bold', fontsize=14) 
-# ==========================================
-# 1. SETUP & DATA PREP
-# ==========================================
+
+# Data cleaning and preprocessing
 color_normal = '#A0E7E5' 
 color_anomaly = '#FFAEBC' 
 color_weekend = '#FBE7C6' 
@@ -72,6 +70,7 @@ df_corrected['DayOfMonth'] = df_corrected['Pstng Date'].dt.day
 features = ['Amount_USD_Corrected', 'Category_Enc', 'Entity_Enc', 'Type_Enc', 'PK_Enc', 'DayOfWeek', 'DayOfMonth']
 X = df_corrected[features].fillna(0)
 
+# Model Training and Anomaly Detection
 # A. Isolation Forest
 iso = IsolationForest(contamination=0.01, random_state=42, n_jobs=-1)
 iso.fit(X)
@@ -89,9 +88,9 @@ df_corrected['Is_Sign_Anomaly'] = np.where(
 
 # C. Final Flag
 df_corrected['Is_Anomaly'] = df_corrected['Is_ML_Anomaly'] | df_corrected['Is_Sign_Anomaly']
-print(f"   -> Total Anomalies Found: {df_corrected['Is_Anomaly'].sum()}")
-print(f"        -> Total ML Anomalies Found: {df_corrected['Is_ML_Anomaly'].sum()}")
-print(f"        -> Total Sign Mismatch Anomalies Found: {df_corrected['Is_Sign_Anomaly'].sum()}")
+print(f"-> Total Anomalies Found: {df_corrected['Is_Anomaly'].sum()}")
+print(f"    -> Total ML Anomalies Found: {df_corrected['Is_ML_Anomaly'].sum()}")
+print(f"    -> Total Sign Mismatch Anomalies Found: {df_corrected['Is_Sign_Anomaly'].sum()}")
 
 # Feature Importance
 clf_explain = RandomForestClassifier(n_estimators=100, random_state=42, max_depth=5)
@@ -100,9 +99,8 @@ label_map = {'Amount_USD_Corrected': 'Transaction Amount','Category_Enc': 'Categ
 importances = pd.DataFrame({'Feature': features, 'Importance': clf_explain.feature_importances_}).sort_values('Importance', ascending=False)
 importances['Feature'] = importances['Feature'].map(label_map)
 
-# ==========================================
-# 6. GENERATE VISUALIZATIONS
-# ==========================================
+
+# Visualizations
 # --- EDA - Weekly Net Cash Flow ---
 plt.figure(figsize=(14, 6))
 df_weekly = df_corrected.set_index('Pstng Date').resample('W')['Amount_USD_Corrected'].sum().reset_index()
@@ -237,7 +235,6 @@ plt.savefig('ml_anomaly_percentage.png')
 
 # --- Anomaly Count by Entity Country (ML) ---
 plt.figure(figsize=(12, 9))
-# Filter for anomalies ONLY
 anomaly_country_counts = df_corrected[df_corrected['Is_Anomaly']][country_col].value_counts().head(15)
 
 ax = sns.barplot(
@@ -257,37 +254,27 @@ plt.savefig('ml_entity_country_anomalies.png')
 # --- Anomaly Ratio (Category) - 100% Stacked Bar ---
 plt.figure(figsize=(12, 9))
 
-# 1. Group & Count
+# Group & Count
 cat_counts = df_corrected.groupby(['Category_Main', 'Is_Anomaly']).size().unstack(fill_value=0)
 
-# 2. Filter for Volume (Keep only categories with > 20 transactions)
+# Filter for volume for categories with > 20 transactions)
 cat_counts = cat_counts[cat_counts.sum(axis=1) > 20]
 
 # 3. Calculate Percentages (Normalize to 100%)
 cat_pct = cat_counts.div(cat_counts.sum(axis=1), axis=0) * 100
 
-# 4. Sort by Anomaly Percentage (High risk at top)
+# Sort by Anomaly Percentage (High risk at top)
 if True in cat_pct.columns:
-    cat_pct = cat_pct.sort_values(by=True, ascending=True) # Ascending for horizontal bar (highest at top visually usually requires tweaking but standard barh builds bottom up)
-    # Actually for barh, the last item in dataframe is at the top. So we sort Ascending to put Highest Anomaly at Bottom? 
-    # Let's sort Descending so highest anomaly is at the top.
-    # Wait, pandas plot barh puts index 0 at bottom. So sort Ascending to put Highest at Top.
+    cat_pct = cat_pct.sort_values(by=True, ascending=True) 
     cat_pct = cat_pct.sort_values(by=True, ascending=True)
 
-# 5. Plot 100% Stacked Bar
+# Plot 100% Stacked Bar
 ax = cat_pct.plot(kind='barh', stacked=True, color=[color_normal, color_anomaly], figsize=(12, 6), width=0.8)
-
-# 6. Customize
 plt.title('Risk Concentration: Anomaly vs Normal Ratio (%) (100% Stacked)', fontsize=14, fontweight='bold')
 plt.xlabel('Percentage (%)')
 plt.ylabel('Category')
 plt.legend(title='Transaction Type', labels=['Normal', 'Anomaly'], bbox_to_anchor=(1.05, 1), loc='upper left')
-
-# 7. Add Smart Labels (Only label the Anomaly portion)
 for c in ax.containers:
-    # c is a group of bars (e.g. all the "Normal" bars, then all the "Anomaly" bars)
-    # We only want to label the "Anomaly" bars (which correspond to True, usually the second container)
-    # Let's check the color or index.
     if c.get_label() == 'True' or c.get_label() == True: # The label comes from the column name
         labels = [f'{w:.1f}%' if w > 0 else '' for w in c.datavalues]
         ax.bar_label(c, labels=labels, label_type='center', fontsize=14, fontweight='bold', color='black')
@@ -309,28 +296,24 @@ plt.savefig('ml_timeline.png')
 # --- Anomaly Ratio (Entity Country) - 100% Stacked Bar ---
 plt.figure(figsize=(9, 18))
 
-# 1. Group by Country and Anomaly Status
+# Group by Country and Anomaly Status
 country_counts_stack = df_corrected.groupby([country_col, 'Is_Anomaly']).size().unstack(fill_value=0)
 
-# 2. Filter for Volume (Keep only countries with > 10 transactions to avoid noise)
-country_counts_stack = country_counts_stack[country_counts_stack.sum(axis=1) > 10]
+# Filter for volume for countries with > 20 transactions 
+country_counts_stack = country_counts_stack[country_counts_stack.sum(axis=1) > 20]
 
-# 3. Calculate Percentages (Normalize to 100%)
+# Calculate Percentages (Normalize to 100%)
 country_pct = country_counts_stack.div(country_counts_stack.sum(axis=1), axis=0) * 100
 
-# 4. Sort by Anomaly Percentage
+# Sort by Anomaly Percentage
 country_pct = country_pct.sort_values(by=True, ascending=True)
 
-# 5. Plot 100% Stacked Bar
+# Plot 100% Stacked Bar
 ax = country_pct.plot(kind='barh', stacked=True, color=[color_normal, color_anomaly], figsize=(12, 6), width=0.8)
-
-# 6. Customize
 plt.title('Risk Concentration: Anomaly Ratio by Country (100% Stacked)', fontsize=14, fontweight='bold')
 plt.xlabel('Percentage (%)')
 plt.ylabel('Country')
 plt.legend(title='Transaction Type', labels=['Normal', 'Anomaly'], bbox_to_anchor=(1.05, 1), loc='upper left')
-
-# 7. Add Smart Labels
 for c in ax.containers:
     if c.get_label() == 'True' or c.get_label() == True:
         labels = [f'{w:.1f}%' if w > 0 else '' for w in c.datavalues]
@@ -344,8 +327,7 @@ plt.figure(figsize=(10, 5))
 # Filter specifically for Anomalies Only
 anomaly_day_counts = df_corrected[df_corrected['Is_Anomaly']]['DayOfWeek'].value_counts().sort_index()
 days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-colors_day = [color_anomaly if d < 5 else color_weekend for d in range(7)] # Pink for week, Yellow/Orange for weekend
-# Reindex to ensure all days are present even if 0 count
+colors_day = [color_anomaly if d < 5 else color_weekend for d in range(7)] 
 anomaly_day_counts = anomaly_day_counts.reindex(range(7), fill_value=0)
 
 ax = plt.bar(days, anomaly_day_counts.values, color=colors_day, edgecolor='black')
