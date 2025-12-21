@@ -6,6 +6,16 @@ from sklearn.metrics import mean_squared_error, mean_absolute_percentage_error
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from statsmodels.tsa.stattools import adfuller  # Added for stationarity check
 
+# AstraZeneca Colour Palette Definitions 
+AZ_MULBERRY = "#830051"   # Color 1 (Primary)
+AZ_LIME_GREEN = "#C4D600" # Color 2 (Accent)
+AZ_NAVY = "#003865"       # Color 3 (Support)
+AZ_GRAPHITE = "#3F4444"   # Color 4 (Support)
+AZ_LIGHT_BLUE = "#68D2DF" # Color 5 (Support)
+AZ_MAGENTA = "#D0006F"    # Color 6 (Support)
+AZ_PURPLE = "#3C1053"     # Color 7 (Support)
+AZ_GOLD = "#F0AB00"       # Color 8 (Support)
+
 # 1. Load Datasets
 main_df = pd.read_csv('Datathon Dataset.xlsx - Data - Main.csv').drop(['Assignment'], axis=1)
 category_df = pd.read_csv('Datathon Dataset.xlsx - Others - Category Linkage.csv').rename(columns={'Category' : 'Category Flow'})
@@ -73,15 +83,16 @@ print(f"Mean Squared Error: {mse:,.2f}")
 print(f"Root Mean Squared Error: {rmse:,.2f}")
 print(f"Mean Absolute Percentage Error: {mape:,.2f}")
 
+# 1. Weekly Net Cash Flow Forecast (1 Month)
 plt.figure(figsize=(12, 6))
-plt.plot(ts_data.index, ts_data, label = 'Actual', color = 'blue')
-plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color='red', linestyle='--')
-plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-plt.title('Weekly Net Cash Flow Forecast (1 Month)')
-plt.xlabel('Date')
-plt.ylabel('Net Cash Flow (USD)')
+plt.plot(ts_data.index, ts_data, label='Actual', color=AZ_NAVY, linewidth=2) # Using Navy for actuals 
+plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color=AZ_MULBERRY, linestyle='--') # Using Mulberry for forecast 
+plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color=AZ_LIGHT_BLUE, alpha=0.3) # Light Blue for confidence 
+plt.title('Weekly Net Cash Flow Forecast (1 Month)', color=AZ_GRAPHITE, fontweight='bold')
+plt.xlabel('Date', color=AZ_GRAPHITE)
+plt.ylabel('Net Cash Flow (USD)', color=AZ_GRAPHITE)
 plt.legend()
-plt.grid(True)
+plt.grid(True, color=AZ_GRAPHITE, alpha=0.2) # Graphite for grid 
 plt.savefig("Weekly Net Cash Flow Forecast (1 Month)")
 plt.show()
 
@@ -100,15 +111,16 @@ print(f"Mean Squared Error: {mse:,.2f}")
 print(f"Root Mean Squared Error: {rmse:,.2f}")
 print(f"Mean Absolute Percentage Error: {mape:,.2f}")
 
+# 2. Weekly Net Cash Flow Forecast (6 Month)
 plt.figure(figsize=(12, 6))
-plt.plot(ts_data.index, ts_data, label = 'Actual', color = 'blue')
-plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color='red', linestyle='--')
-plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-plt.title('Weekly Net Cash Flow Forecast (6 Month)')
-plt.xlabel('Date')
-plt.ylabel('Net Cash Flow (USD)')
+plt.plot(ts_data.index, ts_data, label='Actual', color=AZ_NAVY, linewidth=2)
+plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color=AZ_MULBERRY, linestyle='--')
+plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color=AZ_LIGHT_BLUE, alpha=0.3)
+plt.title('Weekly Net Cash Flow Forecast (6 Month)', color=AZ_GRAPHITE, fontweight='bold')
+plt.xlabel('Date', color=AZ_GRAPHITE)
+plt.ylabel('Net Cash Flow (USD)', color=AZ_GRAPHITE)
 plt.legend()
-plt.grid(True)
+plt.grid(True, color=AZ_GRAPHITE, alpha=0.2)
 plt.savefig("Weekly Net Cash Flow Forecast (6 Month) ")
 plt.show()
 
@@ -119,6 +131,9 @@ initial_total_balance = balance_df['Carryforward Balance (USD)'].str.replace(','
 historical_ending_balance = initial_total_balance + ts_data.cumsum()
 
 # creating model
+
+from statsmodels.tsa.statespace.sarimax import SARIMAX
+
 model = SARIMAX(historical_ending_balance, 
                 order=(1, 1, 1), 
                 seasonal_order=(1, 1, 1, 4),
@@ -143,16 +158,21 @@ print(f"Root Mean Squared Error: {rmse:,.2f}")
 print(f"Mean Absolute Percentage Error: {mape:,.2f}")
 
     
+# --- 1 Month Forecast Plot ---
 plt.figure(figsize=(12, 6))
+# Using Navy for the historical line
 plt.plot(historical_ending_balance.index, historical_ending_balance, 
-             label='Actual Ending Balance', color='blue', linewidth=2)
-plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color='red', linestyle='--')
-plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-plt.title('Weekly Ending Cash Balance Forecast (1 Month)')
-plt.xlabel('Date')
-plt.ylabel('Ending Balance (USD)')
+             label='Actual Ending Balance', color=AZ_NAVY, linewidth=2)
+# Using Mulberry for the forecast line
+plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color=AZ_MULBERRY, linestyle='--')
+# Using Light Blue for the confidence interval shading
+plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color=AZ_LIGHT_BLUE, alpha=0.3)
+
+plt.title('Weekly Ending Cash Balance Forecast (1 Month)', color=AZ_GRAPHITE, fontweight='bold')
+plt.xlabel('Date', color=AZ_GRAPHITE)
+plt.ylabel('Ending Balance (USD)', color=AZ_GRAPHITE)
 plt.legend()
-plt.grid(True, alpha=0.3)
+plt.grid(True, alpha=0.3, color=AZ_GRAPHITE)
 plt.savefig("Weekly Ending Cash Balance Forecast (1 Month)")
 plt.show()
 
@@ -173,16 +193,21 @@ print(f"Root Mean Squared Error: {rmse:,.2f}")
 print(f"Mean Absolute Percentage Error: {mape:,.2f}")
 
 
+# --- 6 Month Forecast Plot ---
 plt.figure(figsize=(12, 6))
+# Using Navy for the historical line
 plt.plot(historical_ending_balance.index, historical_ending_balance, 
-             label='Actual Ending Balance', color='blue', linewidth=2)
-plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color='red', linestyle='--')
-plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color='pink', alpha=0.3)
-plt.title('Weekly Ending Cash Balance Forecast (6 Month)')
-plt.xlabel('Date')
-plt.ylabel('Ending Balance (USD)')
+             label='Actual Ending Balance', color=AZ_NAVY, linewidth=2)
+# Using Mulberry for the forecast line
+plt.plot(forecast_mean.index, forecast_mean, label='SARIMA Forecast', color=AZ_MULBERRY, linestyle='--')
+# Using Light Blue for the confidence interval shading
+plt.fill_between(forecast_mean.index, conf_int.iloc[:, 0], conf_int.iloc[:, 1], color=AZ_LIGHT_BLUE, alpha=0.3)
+
+plt.title('Weekly Ending Cash Balance Forecast (6 Month)', color=AZ_GRAPHITE, fontweight='bold')
+plt.xlabel('Date', color=AZ_GRAPHITE)
+plt.ylabel('Ending Balance (USD)', color=AZ_GRAPHITE)
 plt.legend()
-plt.grid(True, alpha=0.3)
+plt.grid(True, alpha=0.3, color=AZ_GRAPHITE)
 plt.savefig("Weekly Ending Cash Balance Forecast (6 Month)")
 plt.show()
 
@@ -190,7 +215,7 @@ plt.show()
 # Categories Forecasting
 
 # Select the top 2 categories to analyze
-top_categories = df.groupby('Category')['Net Cash Flow (USD)'].sum().abs().nlargest(2).index.tolist()
+top_categories = df.groupby('Category')['Net Cash Flow (USD)'].sum().abs().nlargest(4).index.tolist()
 
 plt.figure(figsize=(16, 10))
 
@@ -198,7 +223,7 @@ results = []
 
 # Define forecast window
 eval_start = "2025-10-05"
-future_end = "2025-11-30"
+future_end = "2026-04-19"
 
 for cat in top_categories:
     # Prepare weekly time series
@@ -246,22 +271,44 @@ for cat in top_categories:
     plt.show()
     plt.close()
 
-# Create a dataframe to hold multiple category forecasts
+# 3. Forecasted Net Cash Flow Contribution by Category (with Percentages)
 all_forecasts = pd.DataFrame()
-
 for cat in top_categories:
     cat_ts = df[df['Category'] == cat].set_index('Pstng Date')['Net Cash Flow (USD)'].resample('W').sum().fillna(0)
     model = SARIMAX(cat_ts, order=(1,1,1), seasonal_order=(1,1,1,4), enforce_stationarity=False).fit(disp=False)
-    # Get 4 weeks future forecast
-    f_res = model.get_forecast(steps=4)
+    f_res = model.get_forecast(steps=26)
     all_forecasts[cat] = f_res.predicted_mean
 
-# Plotting the stacked future forecast
-all_forecasts.plot(kind='bar', stacked=True, figsize=(10, 6))
-plt.title("Forecasted Net Cash Flow Contribution by Category (Next 4 Weeks)")
-plt.ylabel("USD")
-plt.xlabel("Week Start Date")
+az_palette = [AZ_MULBERRY, AZ_LIME_GREEN, AZ_NAVY, AZ_GRAPHITE, AZ_LIGHT_BLUE, AZ_MAGENTA, AZ_PURPLE, AZ_GOLD]
+
+# Plotting the stacked bar chart
+ax = all_forecasts.plot(kind='bar', stacked=True, figsize=(10, 6), color=az_palette)
+
+# Calculate total for each bar to determine percentages
+totals = all_forecasts.sum(axis=1)
+
+# Adding percentage labels inside the bars
+for container in ax.containers:
+    # Calculate the percentage for each segment in the current category
+    labels = []
+    for i, v in enumerate(container):
+        val = v.get_height()
+        # Calculate percentage; handle division by zero if total is 0
+        pct = (val / totals.iloc[i]) * 100 if totals.iloc[i] != 0 else 0
+        # Only show labels for segments large enough to read (e.g., > 1%)
+        labels.append(f'{pct:.1f}%' if abs(pct) > 1 else "")
+    
+    # Place labels in the center of the segments
+    ax.bar_label(container, labels=labels, label_type='center', color='white', fontsize=9, fontweight='bold')
+
+az_palette = [AZ_MULBERRY, AZ_LIME_GREEN, AZ_NAVY, AZ_GRAPHITE, AZ_LIGHT_BLUE, AZ_MAGENTA, AZ_PURPLE, AZ_GOLD]
+all_forecasts.plot(kind='bar', stacked=True, figsize=(10, 6), color=az_palette)
+plt.title("Forecasted Net Cash Flow Contribution by Category (Next 26 Weeks)", color=AZ_GRAPHITE, fontweight='bold')
+plt.ylabel("USD", color=AZ_GRAPHITE)
+plt.xlabel("Week Start Date", color=AZ_GRAPHITE)
 plt.xticks(rotation=45)
+plt.grid(axis='y', color=AZ_GRAPHITE, alpha=0.2)
+plt.savefig("Forecasted Net Cash Flow Contribution by Category (Next 26 Weeks)")
 plt.show()
 
 # --- POWER BI EXPORT PREPARATION ---
